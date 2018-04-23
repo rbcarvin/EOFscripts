@@ -1,22 +1,5 @@
 # Run this file to run all data processing/analysis steps
 
-# you likely need the latest version of Rainmaker, which is only on github. 
-# Uncomment the line below and run (only need to do this once)
-# devtools::install_github('USGS-R/Rainmaker')
-
-# load libraries
-library(dplyr)
-library(Rainmaker)
-library(dataRetrieval)
-library(USGSHydroTools)
-library(lubridate)
-library(rnoaa)
-
-# if you do not have certain libraries installed (e.g., the code above failes for one or 
-# more packages) you need to install them (one time only). To do so, uncomment the lines below
-# and fill in the package names.
-# install.packages(c('lubridate', 'rnoaa'))
-
 # source the master file with all site-specific vars
 source('scripts/0_master_file.R', echo = F)
 
