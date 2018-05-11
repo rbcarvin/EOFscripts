@@ -9,7 +9,8 @@ must.haves <- c('storm_start', 'storm_end', 'sample_start', 'sample_end', 'runof
 # set concentration, load, and flag variables
 if (!all(must.haves %in% names(wq))) {
   vars.missing <- must.haves[which(!must.haves %in% names(wq))]
-  stop(paste0('The water quality data is missing column(s): ', paste0(vars.missing, collapse = ', ')))
+  stop(paste0('The water quality data is missing column(s): ', paste0(vars.missing, collapse = ', ')), 
+        call. = F)
 }
 
 # get conc/load vars
@@ -58,7 +59,7 @@ storms <- filter(wq, exclude == 0) %>%
 
 # first, find which variables have a "<"
 # and replace with 0.5 * value
-if (!is.na(flagvars)){
+if (!is.na(flagvars[1])){
 for (i in 1:length(flagvars)) {
   flags <- grep('<', storms[, flagvars[i]])
   storms[flags, concvars[i]] <- 0.5*storms[flags, concvars[i]]
@@ -125,5 +126,15 @@ wq.bystorm <- merge(wq.bystorm, flagsbystorm)
 wq.bystorm <- merge(wq.bystorm, unique(storms[,c('unique_storm_number', 'sub_storms')]), all.x = TRUE)
 wq.bystorm <- merge(wq.bystorm, stormdesc)
 
+# check if wq.bystorm has more than one row, and print message. Otherwise, stop process.
+
 temp_filename <- file.path("data_cached", paste0(site, "_", "prepped_WQbystorm.csv"))
 write.csv(wq.bystorm, temp_filename, row.names = FALSE)
+
+
+if (nrow(wq.bystorm) > 0) {
+  message(paste('Water quality data is now processed. See', temp_filename, 'to ensure correct processing.'))
+} else {
+  stop("Something went wrong with processing of water quality data. To debug, look through code in 'scipts/data_processing/1_calc_storm_wq.R'.")
+}
+
