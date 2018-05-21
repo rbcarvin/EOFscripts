@@ -18,6 +18,7 @@ library(rnoaa)
 library(randomForest)
 library(ggplot2)
 library(pdp)
+library(jtools)
 
 # if you do not have certain libraries installed (e.g., the code above failes for one or 
 # more packages) you need to install them (one time only). To do so, uncomment the lines below
@@ -28,3 +29,6 @@ library(pdp)
 ## Process your raw data ##
 
 source('scripts/run_files/processing_run_file.R', echo = F)
+
+## Analyze your data ##
+source('scripts/run_files/analysis_run_file.R', echo = F)
