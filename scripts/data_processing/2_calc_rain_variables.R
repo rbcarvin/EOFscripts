@@ -9,7 +9,7 @@ if (is.na(rain_file)) {
   
   # set readNWISuv parameters
   parameterCd <- "00045"  # Precipitation
-  startDate <- as.Date(start_date) - 7 # put a week buffer on the study start date in case storm started prior to first sample date
+  startDate <- as.Date(start_date) - 15 # put a two week buffer on the study for antecedent calcs
   endDate <- as.Date(end_date)
   
   # get NWIS data
