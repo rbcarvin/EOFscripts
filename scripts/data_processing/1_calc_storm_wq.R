@@ -32,7 +32,7 @@ if (length(concentrations) == 1 & !is.na(concentrations)){
 
 if (length(flags) == 1 & !is.na(flags)) {
   flagvars <- grep(flags, names(wq), ignore.case = TRUE, value = TRUE)
-} else if (is.na(flags)) {
+} else if (is.na(flags)|is.na(concvars)) {
   flagvars <- NA
 } else {
   flagvars <- flags
@@ -47,6 +47,9 @@ date.vars <- c('sample_start', 'sample_end', 'storm_start', 'storm_end')
 
 for (i in 1:length(date.vars)) {
   wq[,date.vars[i]] <- as.POSIXct(wq[,date.vars[i]], origin = .origin, tz = site_tz, format = datetime_format)
+  if(all(is.na(wq[,date.vars[i]]))) {
+    stop(paste0("Column ", date.vars[i], " was not properly converted to date, and all values are NAs. Please check if the variable datetime_format in 0_master_file.R matches that of the imported columns."))
+  }
 }
 
 # clean up the data to exclude estimated values, combine sub storm events, etc.
@@ -95,6 +98,7 @@ loadbystorm <- storms %>%
   group_by(unique_storm_number) %>%
   summarise_at(vars(loadvars), sum, na.rm = TRUE) 
 
+if (!is.na(concvars)) {
 concbystorm <- storms[,c(concvars, 'unique_storm_number', 'vol_weight')]
 concbystorm[, concvars] <- concbystorm[,concvars]*concbystorm[,'vol_weight']
 
@@ -125,11 +129,30 @@ wq.bystorm <- merge(wq.bystorm, storm.vols)
 wq.bystorm <- merge(wq.bystorm, flagsbystorm)
 wq.bystorm <- merge(wq.bystorm, unique(storms[,c('unique_storm_number', 'sub_storms')]), all.x = TRUE)
 wq.bystorm <- merge(wq.bystorm, stormdesc)
-
+} else {
+  
+  stormdesc <- storms %>%
+    group_by(unique_storm_number) %>%
+    summarise(
+      sample_start = min(sample_start, na.rm = TRUE),
+      sample_end = max(sample_end),
+      storm_start = min(storm_start),
+      storm_end = max(storm_end),
+      peak_discharge = max(peak_discharge), 
+      runoff_volume = sum(runoff_volume), 
+      frozen = paste0(unique(frozen), collapse = ', ')
+    )
+  
+  stormdesc$frozen <- as.numeric(ifelse(nchar(stormdesc$frozen) == 1, stormdesc$frozen, event_over_thaw))
+  
+  wq.bystorm <- loadbystorm
+  wq.bystorm <- merge(wq.bystorm, storm.vols)
+  wq.bystorm <- merge(wq.bystorm, unique(storms[,c('unique_storm_number', 'sub_storms')]), all.x = TRUE)
+  wq.bystorm <- merge(wq.bystorm, stormdesc)
+}
 # check if wq.bystorm has more than one row, and print message. Otherwise, stop process.
 
 temp_filename <- file.path("data_cached", paste0(site, "_", "prepped_WQbystorm.csv"))
-write.csv(wq.bystorm, temp_filename, row.names = FALSE)
 
 
 if (nrow(wq.bystorm) > 0) {
@@ -137,4 +160,7 @@ if (nrow(wq.bystorm) > 0) {
 } else {
   stop("Something went wrong with processing of water quality data. To debug, look through code in 'scipts/data_processing/1_calc_storm_wq.R'.")
 }
+
+write.csv(wq.bystorm, temp_filename, row.names = FALSE)
+
 
