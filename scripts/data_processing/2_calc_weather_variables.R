@@ -2,10 +2,10 @@ storms <- read.csv(file.path('data_cached', paste0(site, '_prepped_WQbystorm.csv
                    stringsAsFactors = FALSE,
                    colClasses = c(storm_start = 'POSIXct', storm_end = 'POSIXct'))
 
-if (nchar(Sys.getenv("noaakey")) == 0) {
+if (nchar(noaakey) == 0) {
   stop('NOAA key not found. Please see data processing SOP for instructions to set up key.')
 }
-options("noaakey" = Sys.getenv("noaakey"))
+options("noaakey" = noaakey)
 
 if (!is.na(noaa_site)) {
   temp_start <- as.character(as.Date(start_date)-7)
@@ -16,7 +16,7 @@ if (!is.na(noaa_site)) {
                                         date_max = temp_end, var = 'all')
   e_time <- Sys.time()
   d_time <- round(difftime(e_time, s_time, units = 'secs'), 0)
-  if (nrow(weather_noww) > 0){
+  if (nrow(weather_noaa) > 0){
     message(paste0(nrow(weather_noaa), ' rows of data pulled from NOAA in ', d_time, ' seconds.'))
   } else {
     stop("Weather data pull from NOAA failed. To debug, see file 'data_processing/2_calc_weather_variables.R'.")

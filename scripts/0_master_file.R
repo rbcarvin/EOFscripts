@@ -141,6 +141,8 @@ weather_file <- '' # filename (ending in .csv) of daily weather data from a near
 noaa_site <- '' # nearest NOAA met station site number. Can use both weather_file and noaa_site if 
                 # weather_file does not contain snow depth. 
 
+noaakey <- '' # set NOAA access key. See SOP for more details.
+
 other_weather_vars <- NA # if you have other daily weather/site characteristic data in your file (e.g., soil temp) and want to 
                          # include them as predictors in the model, include the names of the column here in quotes (e.g. "soil_temp"). 
                          # If you have multiple variables, create a vector of column names (e.g., c("soil_temp", "soil_moisture"))
