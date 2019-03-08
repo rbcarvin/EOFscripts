@@ -37,9 +37,9 @@ for (i in 1:length(responses)) {
 
 }
 # create a dataframe describing the residual models
-mdc <- data.frame(variable = c(clean_names, "Peak discharge"),
-                                 model_fit = perc.var,
-                                 mdc = round(mdc.perc.nbefore, 0))
+mdc <- data.frame(variable = clean_names,
+                  model_fit = perc.var,
+                  mdc = round(mdc.perc.nbefore, 0))
 
 temp_filename <- file.path('data_cached', paste0(site, '_mdc.csv'))
 write.csv(mdc, temp_filename)
