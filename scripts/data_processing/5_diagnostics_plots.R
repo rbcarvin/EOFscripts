@@ -6,46 +6,41 @@ wq <- read.csv(tempfile, stringsAsFactors = F)
 
 # for each constituent, plot time vs conc or load, size of dot = discharge
 # get load and conc vars
-if (length(loads) == 1 & !is.na(loads)){
-  
-  loadvars <- grep(loads, names(wq), ignore.case = TRUE, value = TRUE)
 
-} else if (is.na(loads)) {
-  loadvars <- NA
-} else {
-  loadvars <- loads
-}
+loadvars <- wq_env$loadvars
+concvars <- wq_env$concvars
 
-if (length(concentrations) == 1 & !is.na(concentrations)){
-  
-  concvars <- grep(concentrations, names(wq), ignore.case = TRUE, value = TRUE)
-  
-} else if (is.na(concentrations)) {
-  concvars <- NA
-} else {
-  concvars <- concentrations
-}
 
 wq[,'storm_start'] <- as.POSIXct(wq[,'storm_start'])
 wq$Date <- wq[,'storm_start']
 wq <- dataRetrieval::addWaterYear(wq)
 
-plot_all_vars <- c(concvars, loadvars)
-plot_all_vars <- plot_all_vars[!is.na(plot_all_vars)]
+load('data_cached/modvars.Rdata')
+plot_all_vars <- responses
 
 
 
 for (i in 1:length(plot_all_vars)) {
   
   temp_var <-  plot_all_vars[i]
+  
+  subtitle_string <- paste0("There were ", length(!is.na(wq[,temp_var])), 
+                            ' storm events, ', length(!is.na(wq[wq$period == 'before',temp_var])),
+                            ' of which are from before the BMP implementation and ', length(!is.na(wq[wq$period == 'after',temp_var])),
+                            ' of which are from after the BMP implementation')
 
   p <- ggplot(data = wq, aes_string(x = 'storm_start', y = temp_var)) +
-    geom_point(aes(color = period, size = runoff_volume), alpha = 0.5) +
+    geom_point(aes(color = period, size = runoff_volume, shape = frozen), alpha = 0.5) +
+    scale_y_log10(breaks = scales::trans_breaks("log10", function(x) 10^x),
+                  labels = scales::trans_format("log10", scales::math_format(10^.x))) +
+    #annotation_logticks() + 
     #scale_size_continuous(trans = 'log10') +
     #coord_trans(y = 'log10') +
     theme_bw() +
     theme(panel.grid.minor.y = element_blank()) +
-    labs(x = 'Storm Date', y = clean_names[i])
+    labs(x = 'Storm Date', y = clean_names[i],
+         subtitle = stringr::str_wrap(subtitle_string, width = 75))
+    
   
   short_col_name <- paste0(site, '_', temp_var, '_throughtime.png')
   tempname <- file.path('figures', 'diagnostic', short_col_name)
@@ -76,6 +71,8 @@ if(!is.na(concvars[1])) {
     group_by(waterYear) %>%
     summarize_at(.vars = concvars, mean, na.rm = T) %>%
     left_join(sum_stats)
+  
+  names(sum_stats)[names(sum_stats) %in% concvars] <- paste0('mean_', concvars)
 }
 
 temp_table_name <- paste0(site, '_response_summary.csv')
@@ -107,7 +104,8 @@ prop <- wq.temp %>%
   summarise_at(vars(loadvars), sum)
 
 # change names to be shortened/clean versions
-names(prop)[2:ncol(prop)] <- clean_names[(length(concvars) + 1):(length(clean_names))]
+
+names(prop)[2:ncol(prop)] <- clean_names[ifelse(is.na(concvars), 1, length(concvars) + 1):((ifelse(is.na(concvars), 1, length(concvars) + 1) + (length(loadvars)))-1)]
 prop.long <- prop %>%
   gather(variable, value, -frozen)
 
@@ -154,6 +152,7 @@ ggsave(file.path('figures', 'diagnostic', temp_figname), p, height = 5, width = 
 
 p <- ggplot(wq, aes(x = weq, y = runoff_volume)) +
   geom_point(aes(color = frozen)) +
+  #scale_y_log10() +
   theme_bw() +
   annotate('text', x = Inf, y = Inf, label = paste0(length(which(is.na(wq$weq))), ' missing rain or snow values.'), hjust = 1, vjust = 1, col = 'red') +
   labs(x = 'Snow + Rain (water equivalent, in inches)', y = "Total Runoff")
@@ -176,3 +175,7 @@ if (length(time.figs) != length(plot_all_vars)|
 } else {
   message("Diagnostic plots have been made. See figures in figures/diagnostic as a visual test of proper importing, merging, and cleaning. If you would like to add figures to diagnostics, you can modify the script in scripts/data_processing/5_diagnostic_plots.R.")
 }
+
+# test if variables are being imported correctly based 
+# on input to 0_master_file.R
+

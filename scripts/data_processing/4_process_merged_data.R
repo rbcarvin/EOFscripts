@@ -12,25 +12,23 @@ eof$weq <- ifelse(eof$snwd_diff >= 0, eof$rain, eof$rain + (abs(eof$snwd_diff)/1
 # have grouped them from each processing step (e.g., rain vars, then discharge vars), 
 # I think this will standardize predictors since each step has standard output.
 # rain, weather, field predictors, discharge, frozen
-predictors <- names(select(eof, rain:ARFdays14, sin_sdate:snwd_diff, days_since_planting:days_since_cultivation, 
+predictors <- names(select(eof, weq, duration:ARFdays14, sin_sdate:tmin, days_since_planting:days_since_disturbance, 
                            ant_dis_1day_max:ant_dis_14day_max, frozen))
 
 # drop site-specific predictors that shouldn't be in mod
-predictors <- predictors[-which(predictors %in% predictors_drop)]
-                    
-# set responses and set cleaner name to plot for responses
-if (length(concentrations) > 1) {
-  conc_names <- concentrations
-} else {
-  conc_names <- grep(concentrations, names(eof), ignore.case = TRUE, value = TRUE)
-}
-if (length(loads) > 1) {
-  load_names <- loads
-} else {
-  load_names <- grep(loads, names(eof), ignore.case = TRUE, value = TRUE)
+if (!any(is.na(predictors_drop))) {
+  predictors <- predictors[-which(predictors %in% predictors_drop)]
 }
 
-responses <- names(select(eof, conc_names, load_names, peak_discharge))
+                    
+# set responses and set cleaner name to plot for responses
+
+conc_names <- wq_env$concvars
+
+load_names <- wq_env$loadvars
+
+responses <- c(conc_names, load_names, other_responses)
+responses <- responses[!is.na(responses)]
 
 ########################
 # turn frozen into logical column

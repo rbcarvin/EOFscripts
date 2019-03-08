@@ -122,10 +122,12 @@ nut_additions_keywords <- c('manure', 'fertilizer') # words used to describe any
 cultivation_keywords <- c('cultivation') # words to describe tillage and other field cultivation activities
                                          # this word will be found in the "activity_group"
 planting_keywords <- c('planting') # words to describing planting activities, found in "activity_group" column
-harvest_keywords <- c('cutting', 'harvest') # words describing cutting/harvest activities, found in "activity_group" column.
+harvest_keywords <- 'harvest' # words describing cutting/harvest activities, found in "activity_group" column.
+cutting_keywords <- 'cutting' # harvest should describe taking of non-perennial crops. Cutting should describe taking of cover crops
+# that will regrow without replanting (e.g., alfalfa). Use NA if no cuttings took place on field.
 
 # discharge data
-discharge_file <- '' # filename of discharge data of a nearby stream gage to calculate antecedent discharge, NA if pulling from NWIS using site_no
+discharge_file <- NA # filename of discharge data of a nearby stream gage to calculate antecedent discharge, NA if pulling from NWIS using site_no
 discharge_site_no <- '' # if not providing a discharge file, the USGS stream gage site to pull discharge data from
 antecedent_days <- c(1,2,3,7,14) # the days over which to calculate antecedent discharge. These are the values used for the WI sites.
 
@@ -141,6 +143,8 @@ weather_file <- '' # filename (ending in .csv) of daily weather data from a near
 noaa_site <- '' # nearest NOAA met station site number. Can use both weather_file and noaa_site if 
                 # weather_file does not contain snow depth. 
 
+noaakey <- '' # set NOAA access key. See SOP for more details.
+
 other_weather_vars <- NA # if you have other daily weather/site characteristic data in your file (e.g., soil temp) and want to 
                          # include them as predictors in the model, include the names of the column here in quotes (e.g. "soil_temp"). 
                          # If you have multiple variables, create a vector of column names (e.g., c("soil_temp", "soil_moisture"))
@@ -150,12 +154,12 @@ other_weather_vars <- NA # if you have other daily weather/site characteristic d
                          # the file scripts/data_processing/2_calc_weather_variables
 
 ######## other ##############
-predictors_drop <- '' # one or more predictor variables that should be dropped from the analysis based
+predictors_drop <- NA # one or more predictor variables that should be dropped from the analysis based
                       # on site-specific analysis goals. For example, if you expect that the implemented
                       # BMP will affect field activity (e.g., if the farmer moves to no-till, 'days_since_cultivation'
                       # will be different before vs after) it should not be included in the residual model.
                       # to get a full list of variables that that can be included in the model, 
                       # run the 'processing_run_file.R' and look at the generated 'merged_dat.csv' file 
-                      # stored in data_cached
+                      # stored in data_cached. NA if no predictors are to be dropped.
 
 
