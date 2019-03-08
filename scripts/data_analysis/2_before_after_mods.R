@@ -39,9 +39,11 @@ for (i in 1:length(responses)) {
   
   pdf(paste0('figures/', site, '_rf_pp_', responses[i], '.pdf'), heigh = 6, width = 6)
   par(mfcol = c(2,2), mar = c(4,2,2,2), oma = c(2,2,3,0))
-  for (n in top.vars){
-    partialPlot(mod, pred.data = dat.mod, x.var = paste(n),
-                xlab = n, main = "")
+  
+  for (k in top.vars){
+    
+    partialPlot(mod, pred.data = dat.mod, x.var = mod_env$k,
+                xlab = k, main = "")
   }
   mtext(paste0("Partial Dependence plots - ", clean_names[i]), side = 3, outer = T)
   dev.off()
@@ -103,7 +105,7 @@ write.csv(file = temp_filename, x = before_after_resid, row.names = F)
 
 test <- nrow(before_after_resid[!is.na(before_after_resid$perc_var), ])
 
-if (test != length())
+#if (test != length())
 
 #####################################
 ## now calculate % change if difference
@@ -125,7 +127,7 @@ load.after <- c()
 
 for (i in 1:(length(responses)-1)) {
   
-  if (pval.differences[i] > 0.05) {
+  if (pval.differences[i] > 0.1) {
     before.fit[i] <- NA
     after.fit[i] <- NA
     pvals.ba[i] <- NA
