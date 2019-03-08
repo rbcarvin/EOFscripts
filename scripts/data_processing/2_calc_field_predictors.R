@@ -24,7 +24,8 @@ field_events <- arrange(storms, storm_start) %>%
 field_events <- field_events %>%
   mutate(days_since_planting = NA) %>%
   mutate(days_since_fertilizer = NA) %>%
-  mutate(days_since_cultivation = NA)
+  mutate(days_since_cultivation = NA) %>%
+  mutate(days_since_disturbance = NA)
 
 for (i in 1:nrow(field_events)) {
   
@@ -46,18 +47,70 @@ for (i in 1:nrow(field_events)) {
   cultivation_diff <- temp_date - temp_cultivation$date
   field_events$days_since_cultivation[i] <- as.numeric(min(cultivation_diff))
   
-  #plantings & harvest
-  temp_timeline <- filter(timeline, date <= temp_date)
-  planting_filter <- grep(paste0(planting_keywords, collapse = '|'), temp_timeline$activity_group, ignore.case = T)
-  harvest_filter <- grep(paste0(harvest_keywords, collapse = '|'), temp_timeline$activity_group, ignore.case = T)
-  temp_plantings <- temp_timeline[planting_filter, ]
-  temp_harvest <- temp_timeline[harvest_filter, ]
+  # disturbance
+  # basically count days since any field disturbance 
   
-  # now decide which planting/harvest date to use. 
-  # e.g., if a cutting happened between now and planting, use days since cutting
-  temp_diff <- c((temp_date - temp_plantings$date), (temp_date - temp_harvest$date))
+  date_last_disturb <- filter(timeline, date <= temp_date) %>% slice(which.max(date)) %>%
+    pull(date)
   
-  field_events$days_since_planting[i] <- as.numeric(min(temp_diff))
+  days_since_disturb <- as.numeric(temp_date - date_last_disturb)
+  field_events$days_since_disturbance[i] <- ifelse(days_since_disturb > 10, 10, days_since_disturb)
+  
+  #plantings, cutting, & harvest to estimate plant cover
+  if (all(!is.na(cutting_keywords))) {
+    temp_timeline <- filter(timeline, date <= temp_date)
+    planting_filter <- grep(paste0(planting_keywords, collapse = '|'), temp_timeline$activity_group, ignore.case = T)
+    harvest_filter <- grep(paste0(harvest_keywords, collapse = '|'), temp_timeline$activity_group, ignore.case = T)
+    cutting_filter <- grep(paste0(cutting_keywords, collapse = '|'), temp_timeline$activity_group, ignore.case = T)
+    
+    temp_plantings <- temp_timeline[planting_filter, ]
+    temp_harvest <- temp_timeline[harvest_filter, ]
+    temp_cutting <- temp_timeline[cutting_filter, ]
+    
+    temp_all <- bind_rows(temp_plantings, temp_harvest, temp_cutting) %>%
+      arrange(date)
+    
+    # now, filter out everything since the last harvest
+    last_harvest <- filter(temp_all, activity_group %in% c(harvest_keywords, cutting_keywords)) %>%
+      slice(which.max(date)) %>% pull(date)
+    
+    temp_all <- filter(temp_all, date >= last_harvest)
+    
+    # if harvest was the last activity, then set to 0
+    
+    if (any(temp_all$activity_group[which.max(temp_all$date)] %in% harvest_keywords)) {
+      field_events$days_since_planting[i] <- 0
+    } else if (any(temp_all$activity_group[which.max(temp_all$date)] %in% cutting_keywords)) {
+      last_date <- max(temp_all$date)
+      temp_diff <- as.numeric(temp_date - most_recent$date)
+      field_events$days_since_planting[i] <- ifelse(temp_diff > 30, 30, temp_diff)
+    } else {
+      last_date <- max(temp_all$date)
+      temp_diff <- as.numeric(temp_date - last_date)
+      
+      # check if there was a planting date before this. Do not want to reset if planting
+      # on top of a cover crop, for example.
+      
+      if (temp_diff < 30 & any(temp_all$activity_group[nrow(temp_all)-1] %in% planting_keywords)) {
+        temp_diff <- as.numeric(temp_date - temp_all$date[nrow(temp_all)-1])
+      }
+      
+      field_events$days_since_planting[i] <- ifelse(temp_diff > 30, 30, temp_diff)
+    }
+    
+    
+  }
+  # temp_timeline <- filter(timeline, date <= temp_date)
+  # planting_filter <- grep(paste0(planting_keywords, collapse = '|'), temp_timeline$activity_group, ignore.case = T)
+  # harvest_filter <- grep(paste0(harvest_keywords, collapse = '|'), temp_timeline$activity_group, ignore.case = T)
+  # temp_plantings <- temp_timeline[planting_filter, ]
+  # temp_harvest <- temp_timeline[harvest_filter, ]
+  # 
+  # # now decide which planting/harvest date to use. 
+  # # e.g., if a cutting happened between now and planting, use days since cutting
+  # temp_diff <- c((temp_date - temp_plantings$date), (temp_date - temp_harvest$date))
+  # 
+  # field_events$days_since_planting[i] <- as.numeric(min(temp_diff))
 }
 
 field_events <- select(field_events, -storm_start)
