@@ -1,6 +1,6 @@
 # import storm-specific water quality data
-wq <- read.csv(file.path('data_raw', wq_file), na.strings = c("", "NA"), stringsAsFactors = F)
-  
+wq <- read.csv(file.path('data_raw', wq_file), na.strings = c("", "NA"), stringsAsFactors = F, strip.white = TRUE)
+
 # check to see if all required columns are in data frame 
 # use list in stickies to set this, not quite sure what the complete list is
 must.haves <- c('storm_start', 'storm_end', 'sample_start', 'sample_end', 'runoff_volume', 
@@ -109,8 +109,8 @@ concbystorm <- concbystorm %>%
 stormdesc <- storms %>%
   group_by(unique_storm_number) %>%
   summarise(
-    sample_start = min(sample_start),
-    sample_end = max(sample_end),
+    sample_start = min(sample_start, na.rm = TRUE),
+    sample_end = max(sample_end, na.rm = TRUE),
     storm_start = min(storm_start),
     storm_end = max(storm_end),
     peak_discharge = max(peak_discharge), 
@@ -135,7 +135,7 @@ wq.bystorm <- merge(wq.bystorm, stormdesc)
     group_by(unique_storm_number) %>%
     summarise(
       sample_start = min(sample_start, na.rm = TRUE),
-      sample_end = max(sample_end),
+      sample_end = max(sample_end, na.rm = TRUE),
       storm_start = min(storm_start),
       storm_end = max(storm_end),
       peak_discharge = max(peak_discharge), 
