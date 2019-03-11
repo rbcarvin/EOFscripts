@@ -9,7 +9,7 @@ if (is.na(rain_file)) {
   
   # set readNWISuv parameters
   parameterCd <- "00045"  # Precipitation
-  startDate <- as.Date(start_date) - 15 # put a two week buffer on the study for antecedent calcs
+  startDate <- as.Date(start_date) - 15 # put a week buffer on the study start date in case storm started prior to first sample date
   endDate <- as.Date(end_date)
   
   # get NWIS data
@@ -22,6 +22,9 @@ if (is.na(rain_file)) {
   } else {
     stop('No precip data pulled from NWIS. Please check inputs to verify correct site number and start and end dates. To debug, see code in "data_processing/2_calc_rain_variables.R"')
   }
+  
+  # get NWIS data from neighboring site to supplement
+  #supplement_rain <- readNWISuv('04085108', parameterCd, tz = site_tz, startDate = '', endDate = '') 
   
   # rename columns
   precip_raw <- renameNWISColumns(precip_raw)
@@ -43,9 +46,9 @@ if (is.na(rain_file)) {
     
   # read in precip file
   precip_raw <- read.csv(file.path('data_raw', rain_file), stringsAsFactors = FALSE, strip.white = TRUE)
-  precip_raw[,'datetime'] <- as.POSIXct(precip_raw[,'datetime'], tz = site_tz)
+  precip_raw[,'pdate'] <- as.POSIXct(precip_raw[,'pdate'], tz = site_tz)
   
-  names(precip_raw) <- c('pdate', 'rain')
+  #names(precip_raw) <- c('pdate', 'rain')
 }
 
 ############## Process rain data ###########
