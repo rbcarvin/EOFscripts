@@ -36,16 +36,27 @@ for (i in 1:nrow(field_events)) {
   temp_timeline <- timeline[man_fert_filter, ]
   temp_timeline <- filter(temp_timeline, date <= temp_date)
   
-  fert_diff <- temp_date - temp_timeline$date
-  field_events$days_since_fertilizer[i] <- as.numeric(min(fert_diff))
+  if (nrow(temp_timeline) == 0) {
+    field_events$days_since_fertilizer[i] <- NA
+  } else {
+    fert_diff <- temp_date - temp_timeline$date
+    field_events$days_since_fertilizer[i] <- as.numeric(min(fert_diff))
+  }
+  
   
   # cultivation
   cultivation_filter <- grep(paste0(cultivation_keywords, collapse = '|'), timeline$activity_group, ignore.case = T)
   temp_timeline <- timeline[cultivation_filter, ]
   temp_cultivation <- filter(temp_timeline, date <= temp_date)
   
-  cultivation_diff <- temp_date - temp_cultivation$date
-  field_events$days_since_cultivation[i] <- as.numeric(min(cultivation_diff))
+  if (nrow(temp_cultivation) == 0) {
+    field_events$days_since_cultivation[i] <- NA
+  } else {
+    cultivation_diff <- temp_date - temp_cultivation$date
+    field_events$days_since_cultivation[i] <- as.numeric(min(cultivation_diff))
+  }
+  
+  
   
   # disturbance
   # basically count days since any field disturbance 
@@ -53,12 +64,21 @@ for (i in 1:nrow(field_events)) {
   date_last_disturb <- filter(timeline, date <= temp_date) %>% slice(which.max(date)) %>%
     pull(date)
   
-  days_since_disturb <- as.numeric(temp_date - date_last_disturb)
-  field_events$days_since_disturbance[i] <- ifelse(days_since_disturb > 10, 10, days_since_disturb)
+  if (length(date_last_disturb) == 0) {
+    field_events$days_since_disturbance[i] <- NA
+  } else {
+    days_since_disturb <- as.numeric(temp_date - date_last_disturb)
+    field_events$days_since_disturbance[i] <- ifelse(days_since_disturb > 10, 10, days_since_disturb)
+  }
   
+ 
   #plantings, cutting, & harvest to estimate plant cover
   if (all(!is.na(cutting_keywords))) {
     temp_timeline <- filter(timeline, date <= temp_date)
+    
+    if (nrow(temp_timeline)==0) {
+      field_events$days_since_planting[i] <- NA
+    } else {
     planting_filter <- grep(paste0(planting_keywords, collapse = '|'), temp_timeline$activity_group, ignore.case = T)
     harvest_filter <- grep(paste0(harvest_keywords, collapse = '|'), temp_timeline$activity_group, ignore.case = T)
     cutting_filter <- grep(paste0(cutting_keywords, collapse = '|'), temp_timeline$activity_group, ignore.case = T)
@@ -74,13 +94,38 @@ for (i in 1:nrow(field_events)) {
     last_harvest <- filter(temp_all, activity_group %in% c(harvest_keywords, cutting_keywords)) %>%
       slice(which.max(date)) %>% pull(date)
     
+    if (length(last_harvest) == 0) {
+      if (nrow(temp_all) == 1) {
+        temp_diff <- as.numeric(temp_date - temp_all$date)
+        field_events$days_since_planting[i] <- ifelse(temp_diff > 30, 30, temp_diff)
+        
+      } else if (any(temp_all$activity_group[which.max(temp_all$date)] %in% cutting_keywords)) {
+        last_date <- max(temp_all$date)
+        temp_diff <- as.numeric(temp_date - most_recent$date)
+        field_events$days_since_planting[i] <- ifelse(temp_diff > 30, 30, temp_diff)
+      } else {
+        last_date <- max(temp_all$date)
+        temp_diff <- as.numeric(temp_date - last_date)
+        
+        # check if there was a planting date before this. Do not want to reset if planting
+        # on top of a cover crop, for example.
+        
+        if (temp_diff < 30 & any(temp_all$activity_group[nrow(temp_all)-1] %in% planting_keywords)) {
+          temp_diff <- as.numeric(temp_date - temp_all$date[nrow(temp_all)-1])
+        }
+        
+        field_events$days_since_planting[i] <- ifelse(temp_diff > 30, 30, temp_diff)
+      }
+    } else {
+    
     temp_all <- filter(temp_all, date >= last_harvest)
     
     # if harvest was the last activity, then set to 0
     
     if (any(temp_all$activity_group[which.max(temp_all$date)] %in% harvest_keywords)) {
       field_events$days_since_planting[i] <- 0
-    } else if (any(temp_all$activity_group[which.max(temp_all$date)] %in% cutting_keywords)) {
+    
+      } else if (any(temp_all$activity_group[which.max(temp_all$date)] %in% cutting_keywords)) {
       last_date <- max(temp_all$date)
       temp_diff <- as.numeric(temp_date - most_recent$date)
       field_events$days_since_planting[i] <- ifelse(temp_diff > 30, 30, temp_diff)
@@ -96,6 +141,8 @@ for (i in 1:nrow(field_events)) {
       }
       
       field_events$days_since_planting[i] <- ifelse(temp_diff > 30, 30, temp_diff)
+    }
+    }
     }
     
     
