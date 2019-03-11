@@ -101,7 +101,7 @@ for (i in 1:nrow(field_events)) {
         
       } else if (any(temp_all$activity_group[which.max(temp_all$date)] %in% cutting_keywords)) {
         last_date <- max(temp_all$date)
-        temp_diff <- as.numeric(temp_date - most_recent$date)
+        temp_diff <- as.numeric(temp_date - last_date)
         field_events$days_since_planting[i] <- ifelse(temp_diff > 30, 30, temp_diff)
       } else {
         last_date <- max(temp_all$date)
@@ -127,7 +127,7 @@ for (i in 1:nrow(field_events)) {
     
       } else if (any(temp_all$activity_group[which.max(temp_all$date)] %in% cutting_keywords)) {
       last_date <- max(temp_all$date)
-      temp_diff <- as.numeric(temp_date - most_recent$date)
+      temp_diff <- as.numeric(temp_date - last_date)
       field_events$days_since_planting[i] <- ifelse(temp_diff > 30, 30, temp_diff)
     } else {
       last_date <- max(temp_all$date)
