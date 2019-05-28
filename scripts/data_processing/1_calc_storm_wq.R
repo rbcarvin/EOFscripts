@@ -38,6 +38,14 @@ if (length(flags) == 1 & !is.na(flags)) {
   flagvars <- flags
 }
 
+# output table of response vars and names to ensure proper pulling
+responses <- c(concvars, loadvars, other_responses)
+responses <- responses[!is.na(responses)]
+
+response_table <- data.frame(responses = responses, 
+                             responses_clean_names = clean_names)
+
+write.csv(response_table, file.path('data_cached', paste0(site, '_response_var_check.csv')))
 
 # set dates to time zone
 .origin <- as.POSIXct(ifelse(Sys.info()[['sysname']] == "Windows", "1899-12-30", "1904-01-01"))
