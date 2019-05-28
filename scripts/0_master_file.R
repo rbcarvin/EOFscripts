@@ -15,12 +15,6 @@ study_type <- '' # either "before_after" or "paired"
 site <- '' # site abbreviation that may be used for file naming conventions
            # If this is a paired watershed study, this should be your test or treatment watershed.
 
-# for paired studies
-site_paired <- '' # site abbreviation for the paired control site. This will be used in file naming conventions.
-
-control_site <- 'con' # If a paired study design, the abbreviation of the control site that precedes column names.
-test_site <- 'trt' # If a paired study design, the abbreviation of the test, or BMP implementation, site. This should be the same abbreviation as oneof the sites listed above.
-
 ######## date & times ###################
 # R likes dates in a very specific format (YYYY-MM-DD, coded in R as "%Y-%m-%d"), and if your dates/times
 # are not in the preffered time format, R needs to know that. Set the variables below to reflect your format.
@@ -51,8 +45,13 @@ bmp_date <- as.POSIXct('') # YYYY-MM-DD HH:MM:SS date/time of BMP implementation
 end_date <- as.POSIXct('') # YYYY-MM-DD HH:MM:SS date/time of study end
 
 ######## storm event data #############
-## set wq data parameters
+## set wq data parameters (before-after site)
 wq_file <- '' # file name (with .csv extention) where event-level water quality data are stored
+
+# set wq data parameters for paired sites
+control_site_file <- '' # WQ data for control site
+treatment_site_file <- '' # WQ data for treatment site
+
 
 # for setting conentrations and loads, only include the variables you want to 
 # include in the analysis. E.g., if you only want to evaluate loads (not concentrations), 
