@@ -53,8 +53,9 @@ con_combined_events <- combine_sub_events(wq = con_wq, flagvars = flagvars, conc
 trt_combined_events <- combine_sub_events(wq = trt_wq, flagvars = flagvars, concvars = concvars, loadvars = loadvars)
 
 name_changer <- function(in_dat, prefix) {
-  subset_names <- names(select(in_dat, -unique_storm_number))
+  all_names <- names(in_dat)
   storm_id <- grepl('unique_storm_number', all_names)
+  subset_names <- all_names[!storm_id]
   new_names <- paste0(prefix, subset_names)
   
   names(in_dat)[!storm_id] <- new_names
