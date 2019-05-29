@@ -31,6 +31,16 @@ if (length(flags) == 1 & !is.na(flags)) {
   flagvars <- flags
 }
 
+# output table of response vars and names to ensure proper pulling
+responses <- c(concvars, loadvars)
+responses <- responses[!is.na(responses)]
+
+response_table <- data.frame(responses = responses, 
+                             responses_clean_names = clean_names)
+
+write.csv(response_table, file.path('figures', 'diagnostic', paste0(site, '_response_var_check.csv')))
+
+
 
 
 # make "<" values equal to half of the censored value
