@@ -1,3 +1,6 @@
+test_site <- 'trt'
+control_site <- 'con'
+
 #load paired data
 paired_filename <- file.path("data_cached", paste0(site, "_", site_paired, "_prepped_WQbystorm.csv"))
 wq <- read.csv(paired_filename, stringsAsFactors = F)
@@ -33,14 +36,14 @@ if (length(concentrations) == 1 & !is.na(concentrations)){
 if (length(other_responses) == 1 & !is.na(other_responses)){
   othervars <- grep(concentrations, names(wq), ignore.case = TRUE, value = TRUE)
   trt_othervars <- grep(test_site, othervars, ignore.case = TRUE, value = TRUE)
-  con_othervars <- grep(control_ste, othervars, ignore.case = TRUE, value = TRUE)
+  con_othervars <- grep(control_site, othervars, ignore.case = TRUE, value = TRUE)
 } else if (is.na(concentrations)) {
   trt_othervars <- NA
   con_othervars <- NA
 } else {
   othervars <- concentrations
   trt_othervars <- grep(test_site, othervars, ignore.case = TRUE, value = TRUE)
-  con_othervars <- grep(control_ste, othervars, ignore.case = TRUE, value = TRUE)
+  con_othervars <- grep(control_site, othervars, ignore.case = TRUE, value = TRUE)
 }
 
 # create a dummy variable for period (before/after = 0/1)
@@ -88,4 +91,4 @@ for (i in 1:length(trt_vars)) {
 out$variable <- clean_names
 
 temp_filename <- paste0(site, '_', site_paired, '_mdc.csv')
-write.csv(file.path('data_cached', temp_filename))
+write.csv(x = out, file.path('data_cached', temp_filename))
