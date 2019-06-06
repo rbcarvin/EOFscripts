@@ -29,7 +29,7 @@ run.rainmaker <- function(precip_raw, wq.dat, ieHr = 2, rainthresh = 0.008,
   
   
   # calculate antecedent rain
-  StormSummary <- RMarf(df = tipsbystorm, date = 'pdate', rain = 'rain', df.events = StormSummary, 
+  StormSummary <- RMarf(df = precip_raw, date = 'pdate', rain = 'rain', df.events = StormSummary, 
                         sdate = "StartDate", days = antecedentDays, varnameout = "ARFdays")
   
   
