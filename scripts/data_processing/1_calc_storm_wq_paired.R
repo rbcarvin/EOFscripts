@@ -32,7 +32,7 @@ if (length(flags) == 1 & !is.na(flags)) {
 }
 
 # output table of response vars and names to ensure proper pulling
-responses <- c(concvars, loadvars)
+responses <- c(concvars, loadvars, other_responses)
 responses <- responses[!is.na(responses)]
 
 response_table <- data.frame(responses = responses, 
