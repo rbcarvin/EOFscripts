@@ -32,7 +32,7 @@ if (length(flags) == 1 & !is.na(flags)) {
 }
 
 # output table of response vars and names to ensure proper pulling
-responses <- c(concvars, loadvars)
+responses <- c(concvars, loadvars, other_responses)
 responses <- responses[!is.na(responses)]
 
 response_table <- data.frame(responses = responses, 
@@ -67,6 +67,8 @@ trt_combined_events <- name_changer(trt_combined_events, 'trt_')
 
 wq <- full_join(con_combined_events, trt_combined_events, by = 'unique_storm_number')
 
+# remove rows with NA that occur due to unmatched pairs (event at one site did not occur at other)
+wq <- wq[complete.cases(wq), ]
 
 # set dates to time zone
 .origin <- as.POSIXct(ifelse(Sys.info()[['sysname']] == "Windows", "1899-12-30", "1904-01-01"))
@@ -80,7 +82,7 @@ for (i in 1:length(date.vars)) {
 }
 
 # create a column for "period" -- before or after BMP implementation
-start_col <- paste0(test_site, '_storm_start')
+start_col <- paste0('trt', '_storm_start')
 wq <- wq %>%
   #mutate(frozen = as.logical(eof$frozen)) %>%
   mutate(period = ifelse(wq[,start_col] >= bmp_date, 'after', 'before'))

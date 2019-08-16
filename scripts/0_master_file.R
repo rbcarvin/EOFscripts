@@ -14,6 +14,7 @@ study_type <- '' # either "before_after" or "paired"
 
 site <- '' # site abbreviation that may be used for file naming conventions
            # If this is a paired watershed study, this should be your test or treatment watershed.
+site_paired <- ''# the site abbreviation for the control watershed.
 
 ######## date & times ###################
 # R likes dates in a very specific format (YYYY-MM-DD, coded in R as "%Y-%m-%d"), and if your dates/times
@@ -51,7 +52,7 @@ wq_file <- '' # file name (with .csv extention) where event-level water quality 
 # set wq data parameters for paired sites
 control_site_file <- '' # WQ data for control site
 treatment_site_file <- '' # WQ data for treatment site
-
+discharge_col <- '' # which column of discharge data to use (ie: runoff_volume, storm_runoff_cubic_feet, storm_runoff_inches)
 
 # for setting conentrations and loads, only include the variables you want to 
 # include in the analysis. E.g., if you only want to evaluate loads (not concentrations), 

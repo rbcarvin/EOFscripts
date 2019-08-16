@@ -1,4 +1,6 @@
 # diagnostic plots for paired design
+test_site <- 'trt'
+control_site <- 'con' 
 
 tempfile <- file.path('data_cached', paste0(site, '_', site_paired, "_prepped_WQbystorm.csv"))
 wq <- read.csv(tempfile, stringsAsFactors = F)
@@ -33,7 +35,7 @@ if (length(concentrations) == 1 & !is.na(concentrations)){
   con_concvars <- grep(control_ste, concvars, ignore.case = TRUE, value = TRUE)
 }
 
-temp_date <- paste0(site, '_storm_start')
+temp_date <- 'trt_storm_start'
 wq[,temp_date] <- as.POSIXct(wq[,temp_date])
 wq$Date <- wq[,temp_date]
 wq <- dataRetrieval::addWaterYear(wq)
