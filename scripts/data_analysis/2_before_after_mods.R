@@ -6,6 +6,8 @@ dat.mod.after <- filter(dat.mod, period == 'after')
 mdc.perc.nbefore <- c()
 mdc.perc.nafter <- c()
 pval.differences <- c()
+pval.less <- c()
+pval.greater <- c()
 perc.var <- c()
 
 ####################################
