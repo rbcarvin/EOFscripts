@@ -13,7 +13,7 @@ eof$weq <- ifelse(eof$snwd_diff >= 0, eof$rain, eof$rain + (abs(eof$snwd_diff)/1
 # I think this will standardize predictors since each step has standard output.
 # rain, weather, field predictors, discharge, frozen
 predictors <- names(select(eof, weq, duration:ARFdays14, sin_sdate:tmin, days_since_planting:days_since_disturbance, 
-                           ant_dis_1day_max:ant_dis_14day_max, frozen))
+                           sprintf('ant_dis_%sday_sum', antecedent_days)[1]:sprintf('ant_dis_%sday_sum', antecedent_days)[length(antecedent_days)], frozen))
 
 # drop site-specific predictors that shouldn't be in mod
 if (!any(is.na(predictors_drop))) {
