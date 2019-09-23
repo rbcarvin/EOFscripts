@@ -9,7 +9,8 @@ storms <- wq.dat[,c('unique_storm_number', 'storm_start')]
 
 # get discharge
 if (is.na(discharge_file)) {
-  discharge.dat <- readNWISdv(siteNumbers = discharge_site_no, parameterCd = '00060')
+  discharge.dat <- readNWISuv(siteNumbers = discharge_site_no, parameterCd = '00060')
+  
   discharge.dat <- renameNWISColumns(discharge.dat)
   
   if (nrow(discharge.dat) == 0) {
@@ -23,18 +24,14 @@ if (is.na(discharge_file)) {
   names(discharge.dat)[which(names(discharge.dat) %in% discharge_column)] <- 'Flow'
 }
 
-stats = c('mean', 'max')
+stats = c('sum')
 
-discharge_vars <- TSstats(discharge.dat, date = 'Date', varnames = 'Flow', dates = storms, starttime = "storm_start",
+discharge_vars <- TSstats(discharge.dat, date = 'Date', varnames = 'Flow_Inst', dates = storms, starttime = "storm_start",
                           times = antecedent_days, units = 'days', stats.return = stats)
 
 # rename columns
-names(discharge_vars) <- c(names(discharge_vars)[1:2], c('ant_discharge_date', 'ant_dis_1day_mean', 'ant_dis_1day_max',
-                                                       'ant_dis_2day_mean', 'ant_dis_2day_max',
-                                                       'ant_dis_3day_mean', 'ant_dis_3day_max',
-                                                       'ant_dis_7day_mean', 'ant_dis_7day_max',
-                                                       'ant_dis_14day_mean', 'ant_dis_14day_max'))
-discharge_vars <- select(discharge_vars, -ant_dis_1day_mean, -storm_start)
+names(discharge_vars) <- c(names(discharge_vars)[1:2], 'ant_discharge_date', sprintf('ant_dis_%sday_sum', antecedent_days))
+discharge_vars <- select(discharge_vars, -storm_start)
 
 # write antecedent discharge data
 temp_filename <- file.path('data_cached', paste0(site, '_discharge_variables.csv'))

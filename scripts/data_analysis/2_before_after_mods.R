@@ -6,6 +6,8 @@ dat.mod.after <- filter(dat.mod, period == 'after')
 mdc.perc.nbefore <- c()
 mdc.perc.nafter <- c()
 pval.differences <- c()
+pval.less <- c()
+pval.greater <- c()
 perc.var <- c()
 
 ####################################
@@ -28,10 +30,17 @@ for (i in 1:length(responses)) {
   #                               period = 'after')
   #resid.test.all <- bind_rows(resid.test, resid.test.after)
   
-  diff.test <- t.test(resid.test$resids~resid.test$period,alternative = 'less')
+  #diff.test <- t.test(resid.test$resids~resid.test$period,alternative = 'less')
+  before.dat <- resid.test$resids[resid.test$period %in% 'before']
+  after.dat <- resid.test$resids[resid.test$period %in% 'after']
+  diff.test <- wilcox.test(after.dat, before.dat)
+  less.test <- wilcox.test(after.dat, before.dat, alternative = 'less')
+  greater.test <- wilcox.test(after.dat, before.dat, alternative = 'greater')
   
   pval <- diff.test$p.value
   pval.differences[i] <- pval
+  pval.less[i] <- less.test$p.value
+  pval.greater[i] <- greater.test$p.value
   
   test.text <- ifelse(pval > 0.05, "No sig. differences between groups", "")
   
@@ -97,7 +106,9 @@ for (i in 1:length(responses)) {
 # create a dataframe describing the residual models
 before_after_resid <- data.frame(variable = clean_names,
                                  perc_var = perc.var,
-                                 pvals = round(pval.differences, 2))
+                                 pvals = round(pval.differences, 2),
+                                 pvals_reduction = round(pval.less, 2),
+                                 pvals_increase = round(pval.greater, 2))
 temp_filename <- file.path('data_cached', paste0(site, '_before_after_residual_analysis.csv'))
 write.csv(file = temp_filename, x = before_after_resid, row.names = F)
 
