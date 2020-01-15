@@ -86,7 +86,7 @@ for (i in 1:nrow(storms)) {
   
 }
 
-weather.dat <- select(storms, unique_storm_number, sin_sdate:snwd_diff)
+weather.dat <- select(storms, unique_storm_number, sin_sdate:ncol(storms))
 weather.dat[c("snwd_diff")][is.na(weather.dat[c("snwd_diff")])] <- 0
 weather_tempname <- file.path('data_cached', paste0(site, '_weather_by_storm.csv'))
 write.csv(weather.dat, weather_tempname, row.names = F)
