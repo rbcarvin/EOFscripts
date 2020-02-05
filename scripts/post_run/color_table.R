@@ -42,66 +42,48 @@ temp_change_table <- residual_table[,c("variable", "pvals_reduction","site")]
 cast <-dcast(temp_change_table,site~variable,value.var = "pvals_reduction")
 
 # create color plot
-# https://labrtorian.com/2016/11/07/conditional-formatting-of-a-table-in-r/
+library(ggplot2)
+library(tidyverse)
 
-x=1:ncol(detected_change_table)
-y=1:nrow(detected_change_table)
-centers <- expand.grid(y,x)
-par(mar=c(2,7,4,2))
-image(x, y, t(detected_change_table),
-      col = c(rgb(0,0,1,0.3),rgb(1,0,0,0.3), rgb(1,1,0,0.3)),
-      breaks = c(0, 25, 50, 100),
-      xaxt = 'n', 
-      yaxt = 'n', 
-      xlab = '', 
-      ylab = '',
-      ylim = c(max(y) + 0.5, min(y) - 0.5)
+#colorTable <- readRDS("D:/LADData/colorTable.RDS")
+colorTable <- cast
+
+colorTable_long <- colorTable %>% 
+  pivot_longer(-site, names_to = "param", values_to = "p_val") %>% 
+  mutate(cat_orig = cut(p_val, include.lowest = TRUE,
+                        breaks = c(0,0.05, 0.075, 0.1, 0.9, 0.925, 0.95, 1)))
+
+
+category_df <- data.frame(
+  cat_orig = factor(levels(colorTable_long$cat_orig), levels = levels(colorTable_long$cat_orig)),
+  label = c("0-0.05", "0.05-0.75", "0.75-0.1", "middle", "0.75-0.1", "0.05-0.75", "0-0.05"),
+  category = c("green_1", "green_2", "green_3", "middle", "red_3", "red_2", "red_1")
 )
 
-# goal: \\gs.doi.net\UpperMidwest-W\Legacy Projects\NonPoint Evaluation\GLRI Edge-of-field\Presentations\NRCS-GLRI Update meeting 11-13-19
-
-#https://stackoverflow.com/questions/18663159/conditional-coloring-of-cells-in-table
-palette(c(RColorBrewer::brewer.pal(8, "Pastel1"),
-          RColorBrewer::brewer.pal(8, "Pastel2")))
 
 
-require(gtable)
-require(grid)
-gtable_add_grobs <- gtable_add_grob # alias
+shortNames <- data.frame(
+  param = c("Ammonium load (pounds)",
+            "Chloride load (pounds)",     
+            "NO2 + NO3 load (pounds)"),
+  short_name = c("Ammonium",
+                 "Chloride",
+                 "TKN"),
+  stringsAsFactors = FALSE
+)
 
-d <- head(cast, 3)
-nc <- ncol(d)
-nr <- nrow(d)
+colorTable_long_clean <- colorTable_long %>% 
+  left_join(shortNames, by = "param") %>% 
+  left_join(category_df, by = "cat_orig") %>% 
+  mutate(short_name = ifelse(is.na(short_name), param, short_name))
 
-extended_matrix <- cbind(c("", rownames(d)), rbind(colnames(d), as.matrix(d))) 
+color_scale <- setNames(c("green", "green3", "green4", "white", "red", "red3", "red4"),
+                        category_df$cat_orig)
 
-## text for each cell
-all_grobs <- matrix(lapply(extended_matrix, textGrob), ncol=ncol(d) + 1)
+ggplot(data = colorTable_long_clean) +
+  geom_tile(aes(x = short_name, y = site, fill = cat_orig)) +
+  theme_bw() +
+  theme(axis.text.x = element_text( angle = 90,vjust=0.5,hjust = 0.975)) +
+  scale_fill_manual(na.value = "grey",  
+                    values = color_scale)
 
-## define the fill background of cells
-fill <- lapply(seq_len(nc*nr), function(ii) 
-  rectGrob(gp=gpar(fill=ii)))
-
-## some calculations of cell sizes
-row_heights <- function(m){
-  do.call(unit.c, apply(m, 1, function(l)
-    max(do.call(unit.c, lapply(l, grobHeight)))))
-}
-
-col_widths <- function(m){
-  do.call(unit.c, apply(m, 2, function(l)
-    max(do.call(unit.c, lapply(l, grobWidth)))))
-}
-
-## place labels in a gtable
-g <- gtable_matrix("table", grobs=all_grobs, 
-                   widths=col_widths(all_grobs) + unit(4,"mm"), 
-                   heights=row_heights(all_grobs) + unit(4,"mm"))
-
-## add the background
-g <- gtable_add_grobs(g, fill, t=rep(seq(2, nr+1), each=nc), 
-                      l=rep(seq(2, nc+1), nr), z=0,name="fill")
-
-## draw
-grid.newpage()
-grid.draw(g)
