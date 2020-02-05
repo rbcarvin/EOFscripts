@@ -73,7 +73,7 @@ storms <- filter(wq, exclude == 0) %>%
 # first, find which variables have a "<"
 # and replace with 0.5 * value
 if (!is.na(flagvars[1])){
-for (i in 1:length(flagvars)) {
+  for (i in 1:length(flagvars)) {
   flags <- grep('<', storms[, flagvars[i]])
   storms[flags, concvars[i]] <- 0.5*storms[flags, concvars[i]]
   print(paste0(length(flags), ' observations below detection limit for ', concvars[i]))
