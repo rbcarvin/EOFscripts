@@ -41,6 +41,7 @@ run.rainmaker <- function(precip_raw, wq.dat, ieHr = 2, rainthresh = 0.008,
 
 combine_sub_events <- function(wq, concvars, loadvars, flagvars) {
   storms <- filter(wq, exclude == 0) %>%
+    #filter(storm==1) %>%
     filter(estimated == 0) %>%
     filter(discrete == 0)
   

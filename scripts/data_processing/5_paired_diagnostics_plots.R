@@ -85,7 +85,7 @@ for (i in 1:length(plot_trt_vars)) {
     p <- p + geom_point(aes(color = period, shape = site))
   }
   
-  short_col_name <- paste0(control_site, '_', temp_trt, '_throughtime.png')
+  short_col_name <- paste0(site_paired, '_', site,'_', temp_trt, '_throughtime.png')
   tempname <- file.path('figures', 'diagnostic', short_col_name)
   ggsave(tempname, p, height = 4, width = 8)
 }

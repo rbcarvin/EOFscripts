@@ -22,13 +22,21 @@ if (!any(is.na(predictors_drop))) {
 
                     
 # set responses and set cleaner name to plot for responses
+# remove any responses with all zeroes
+# adjust clean names if any responses were dropped
 
-conc_names <- wq_env$concvars
+response_table <- wq_env$response_table
 
-load_names <- wq_env$loadvars
+zeroes <- eof[ , apply(eof==0,2,all)]
+drop.zeroes <- names(zeroes)
+response_table <- response_table[!(response_table$responses %in% drop.zeroes),]
+  
+responses <- as.character(response_table$responses)
+clean_names <- as.character(response_table$responses_clean_names)
 
-responses <- c(conc_names, load_names, other_responses)
-responses <- responses[!is.na(responses)]
+if (length(drop.zeroes) > 0) {
+  message(c("The following response variables were dropped because all values for that variable were zero: ",toString(drop.zeroes)))
+}
 
 ########################
 # turn frozen into logical column

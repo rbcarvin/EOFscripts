@@ -63,7 +63,7 @@ for (i in 1:length(date.vars)) {
 # clean up the data to exclude estimated values, combine sub storm events, etc.
 # exclude storms that have a 1 in exclude, are estimated, or are discrete samples
 storms <- filter(wq, exclude == 0) %>%
-  #filter(storm == 0) %>% #Event or Baseflow Toggle for Tile sites
+  #filter(storm == 1) %>% #Event (1) or Baseflow (0) Toggle for Tile sites
   filter(estimated == 0) %>%
   filter(discrete == 0) #%>%
   #filter(frozen == 0))

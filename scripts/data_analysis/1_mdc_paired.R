@@ -53,6 +53,23 @@ wq$period_num <- ifelse(wq$period == 'before', 0, 1)
 trt_vars <- c(trt_concvars, trt_loadvars, trt_othervars)
 trt_vars <- trt_vars[!is.na(trt_vars)]
 
+# remove any responses with all zeroes
+# adjust clean names if any responses were dropped
+
+response_table <- wq_env$response_table
+response_table$responses <- paste0("trt_",responses)
+
+zeroes <- wq[ , apply(wq==0,2,all)]
+drop.zeroes <- names(zeroes)
+response_table <- response_table[!(response_table$responses %in% drop.zeroes),]
+
+trt_vars <- as.character(response_table$responses)
+clean_names <- as.character(response_table$responses_clean_names)
+
+if (length(drop.zeroes) > 0) {
+  message(c("The following response variables were dropped because all values for that variable were zero: ",toString(drop.zeroes)))
+}
+
 #con_vars <- c(con_concvars, con_loadvars)
 #con_vars <- con_vars[!is.na(con_vars)]
 

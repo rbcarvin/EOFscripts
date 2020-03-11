@@ -11,10 +11,10 @@
 
 ###
 
-main_path <- file.path('P:/0301/analysis/')
-states <- list.files(main_path,full.names=TRUE,recursive=FALSE)
-sites <- list.files(states,full.names=TRUE, recursive = FALSE)
-
+main_path <- file.path('P:/0301/field_analysis/results')
+#states <- list.files(main_path,full.names=TRUE,recursive=FALSE)
+sites <- list.files(main_path,full.names=TRUE, recursive = FALSE)
+sites <- grep(pattern = 'pair', x=sites, inv=TRUE, value=TRUE)
 # for each site, put the most recent residual analysis table file path into a vector
 tables_recent <- NULL
 for (i in 1:length(sites)){
@@ -25,8 +25,8 @@ for (i in 1:length(sites)){
 
 # make list of site names that match recent tables
 siteID<-gsub(main_path,"",x = tables_recent)
-siteID<-gsub("/results.*","",siteID)
-siteID<-gsub(pattern = "\\/([a-zA-Z0-9]{0,})/","",x=siteID)
+siteID<-gsub("/20.*","",x=siteID)
+siteID<-gsub("/","",x=siteID)
 
 # Read that list of recent tables, add a site ID, stitch them together
 residual_table <- data.frame()
@@ -63,12 +63,13 @@ category_df <- data.frame(
 
 
 shortNames <- data.frame(
-  param = c("Ammonium load (pounds)",
-            "Chloride load (pounds)",     
-            "NO2 + NO3 load (pounds)"),
-  short_name = c("Ammonium",
-                 "Chloride",
-                 "TKN"),
+  param = c("SS load (pounds)","Chloride load (pounds)","NO2 + NO3 load (pounds)",     
+            "Ammonium load (pounds)","TKN load (pounds)","Orthophosphate load (pounds)",
+            "TP load (pounds)","TN load (pounds)","Org N load (pounds)",         
+            "TOC load (pounds)","DOC load (pounds)","Peak discharge (cfs)"),
+  short_name = c("Suspended Sed","Chloride","Nitrate + Nitrite",
+                 "Ammonium","TKN","Ortho P",
+                 "Total P","Total N","Org N","TOC","DOC","Peak flow (cfs)"),
   stringsAsFactors = FALSE
 )
 
@@ -77,13 +78,29 @@ colorTable_long_clean <- colorTable_long %>%
   left_join(category_df, by = "cat_orig") %>% 
   mutate(short_name = ifelse(is.na(short_name), param, short_name))
 
-color_scale <- setNames(c("green", "green3", "green4", "white", "red", "red3", "red4"),
+colorTable_long_clean$short_name <- factor(colorTable_long_clean$short_name,
+                                           levels = c("Volume (cf)","Peak flow (cfs)","Suspended Sed",
+                                                      "Chloride","Nitrate + Nitrite","Ammonium","TKN","Ortho P",
+                                                      "Total P","Total N","Org N","TOC","DOC"))
+
+color_scale <- setNames(c("green4", "green3", "green", "white", "red", "red3", "red4"),
                         category_df$cat_orig)
 
-ggplot(data = colorTable_long_clean) +
-  geom_tile(aes(x = short_name, y = site, fill = cat_orig)) +
-  theme_bw() +
-  theme(axis.text.x = element_text( angle = 90,vjust=0.5,hjust = 0.975)) +
+p <- ggplot(data = colorTable_long_clean) +
+  geom_tile(aes(x = short_name, y = site, fill = cat_orig), colour = "grey25") +
   scale_fill_manual(na.value = "grey",  
-                    values = color_scale)
+                    values = color_scale,
+                    name = "p-value", 
+                    labels = c("0-0.05 decrease", "0.05-0.075", "0.075-0.1", "no significant change",
+                               "0.075-0.1","0.05-0.075","0-0.05 increase"))+
+  theme_classic() +
+  theme(plot.title = element_text(hjust = 0.5),
+        axis.text.x = element_text( angle = 90,vjust=0.5,hjust = 0.975),
+        panel.grid.minor = element_line(size = 0.5, linetype = 'solid',colour = "black")) +
+  guides(fill=guide_legend(reverse = TRUE))+
+  ggtitle("Before and After - Change in Load ") + xlab("") + ylab("Site")
+p
 
+Rundate <- format(Sys.time(),"%Y-%m-%d-%H%M")
+temp_filename <- paste0('P:/0301/field_analysis/meta-analysis/RedGreen_',Rundate,'.png')
+ggsave(filename=temp_filename, p, height = 4, width = 6)

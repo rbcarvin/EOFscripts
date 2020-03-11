@@ -1,14 +1,24 @@
+#----------------------
 # Pre-Run
+#----------------------
+
+# Site Nickname
+nick <- "WI-SW4-SW5"
+nick.1 <- "WI-SW5_WI-SW4"
+# remove files in the local folders that don't match current nick-name
+run_folder <- file.path('D:/EOF/EOFscripts')
+remove <- list.files(file.path(run_folder), pattern = nick, full.names=FALSE, inv=TRUE ,recursive = TRUE)
+file.remove(file.path("D:/EOF/EOFscripts",remove))
 
 # site_folder - point to the folder with site-specific data needed for this run
 
-site_folder <- file.path('P:/0301/analysis/WI/WI-SW4')
+site_folder <- file.path('P:/0301/field_analysis/analyze')
 
 # Temporarily copy raw data to D:EOF/EOFscripts/data_raw
 
-  move.me <- list.files(file.path(site_folder, 'approved_site_data'), pattern = '', full.names=FALSE, recursive = FALSE)
+  move.me <- list.files(site_folder, pattern = '', full.names=FALSE, recursive = FALSE)
   
-  move.this <- file.path(site_folder,'approved_site_data',move.me)
+  move.this <- file.path(site_folder,move.me)
 
   move.here <- file.path("D:/EOF/EOFscripts/data_raw")
   
@@ -18,6 +28,8 @@ site_folder <- file.path('P:/0301/analysis/WI/WI-SW4')
   # copy site-specific data_raw files to the local 'data_raw' folder
   file.copy(from = move.this, to = move.here)
   
+
+######################################################################################################################################  
 # Paired Sites Only
   
   control_site <- file.path('P:/0301/analysis/WI/WI-SW4')

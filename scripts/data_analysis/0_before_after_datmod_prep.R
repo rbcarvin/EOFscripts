@@ -27,5 +27,6 @@ if(any(is.infinite(sums))) {
   stop('Zeros in the response variables caused values to be infinite when log transformed. Please see code in scripts/data_analysis/0_before_after_datmod_prep.R to debug.', call. = F)
 }
 
-# for now, drop Inf values created by logging - TO DO THIS COMMENT OUT LINES 26, 27 AND UNCOMMENT THE FOLLOWING
-#dat.mod <- dat.mod[!is.infinite(rowSums(dat.mod[,responses])),]
+#for now, drop Inf values created by logging - TO DO THIS COMMENT OUT LINES 26, 27 AND UNCOMMENT THE FOLLOWING
+dat.mod <- dat.mod[!is.infinite(rowSums(dat.mod[,responses])),]
+
