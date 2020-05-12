@@ -61,12 +61,17 @@ for (i in 1:length(date.vars)) {
 }
 
 # clean up the data to exclude estimated values, combine sub storm events, etc.
-# exclude storms that have a 1 in exclude, are estimated, or are discrete samples
-storms <- filter(wq, exclude == 0) %>%
-  #filter(storm == 1) %>% #Event (1) or Baseflow (0) Toggle for Tile sites
-  filter(estimated == 0) %>%
-  filter(discrete == 0) #%>%
-  #filter(frozen == 0))
+# exclude storms based on declarations in 0_master
+storms <- wq
+if(filter_exclude == 'YES'){storms <- storms %>% filter(exclude==0)}
+if(filter_estimated == 'YES'){storms <- storms %>% filter(estimated==0)}
+if(filter_discrete == 'YES'){storms <- storms %>% filter(discrete==0)}
+#
+if(filter_frozen=='0'){storms <- storms %>% filter(frozen==0)}
+if(filter_frozen=='1'){storms <- storms %>% filter(frozen==1)}
+#
+if(filter_storm=='0'){storms <- storms %>% filter(storm==0)}
+if(filter_storm=='1'){storms <- storms %>% filter(storm==1)}
 
 # make "<" values equal to half of the censored value
 
