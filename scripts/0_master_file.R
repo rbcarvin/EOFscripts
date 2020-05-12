@@ -79,12 +79,19 @@ flags <- c('flag') # this can either be a vector of verbatim flag
                # columns (e.g, c('SS_flag', 'TP_flag')) or a character string that all flag
                # columns share in common (e.g., "flag")  
 
+# Observation Filters
+filter_exclude <-'YES' # YES = remove observations with 1 in the filter column, NO = keep all observations
+filter_estimated <- 'YES' # YES = remove observations with 1 in the filter column, NO = keep all observations
+filter_discrete <- 'YES' # YES = remove observations with 1 in the filter column, NO = keep all observations
+filter_frozen <- 'NO' # '0'= only include non-frozen, '1'= keep frozen, 'NO' = keep all observations
+filter_storm <- '1' # '0'= only include baseflow events, '1'=only include storm events, 'NO' = don't apply this filter
+
 clean_names <- c('SS load (pounds)', 'Chloride load (pounds)', 
                  'NO2 + NO3 load (pounds)', 'Ammonium load (pounds)', 
                  'TKN load (pounds)', 'Orthophosphate load (pounds)', 
                  'TP load (pounds)', 'TN load (pounds)', 
-                 'Org N load (pounds)', 'Peak discharge (cfs)') 
-
+                 'Org N load (pounds)', 'TOC load (pounds)', 'DOC load (pounds)',
+                 'Peak discharge (cfs)', 'Volume (cf)')
 # Do not change if you're using default settings and the templates provided.
 # This is a vector of "clean" response variables names for all variables you want to 
 # model. This will be used for plotting purposes to create nice looking
