@@ -217,3 +217,4 @@ perc_reduction <- data.frame(response = responses[-length(responses)],
 temp_filename <- file.path('data_cached', paste0(site, '_percent_reduction_before_after.csv'))
 write.csv(perc_reduction, temp_filename, row.names = F)
 
+message('Before/After Analysis is complete.')

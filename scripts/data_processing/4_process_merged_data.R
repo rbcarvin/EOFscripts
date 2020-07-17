@@ -27,10 +27,11 @@ if (!any(is.na(predictors_drop))) {
 
 response_table <- wq_env$response_table
 
-zeroes <- eof[ , apply(eof==0,2,all)]
+zeroes <- eof[, apply(eof==0,2,all)]
 drop.zeroes <- names(zeroes)
 response_table <- response_table[!(response_table$responses %in% drop.zeroes),]
-  
+write.csv(response_table, file.path('data_cached', paste0(site, '_response_var_check.csv')))
+
 responses <- as.character(response_table$responses)
 clean_names <- as.character(response_table$responses_clean_names)
 
@@ -52,7 +53,7 @@ write.csv(site_dat, temp_filename, row.names = F)
 ############
 # save predictors and responses for later use
 
-save(predictors, responses, file = 'data_cached/modvars.Rdata')
+save(predictors, responses, clean_names, file = 'data_cached/modvars.Rdata')
 
 if (nrow(site_dat) > 1) {
   message(paste("The data have now been merged and processed. Please see", temp_filename, "to ensure processing."))

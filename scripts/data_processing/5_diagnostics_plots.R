@@ -101,7 +101,7 @@ if (dif > 3) {
 # calculate sum of loads
 prop <- wq.temp %>%
   group_by(frozen) %>%
-  summarise_at(vars(loadvars), sum)
+  summarise_at(vars(responses), sum)
 
 # change names to be shortened/clean versions
 
@@ -164,9 +164,10 @@ ggsave(file.path('figures', 'diagnostic', temp_figname), p, width = 6, height = 
 # test if figures were written
 
 test <- list.files('figures/diagnostic')
+test <- grep(pattern = site, x = test, value = TRUE)
 time.figs <- grep('throughtime', test)
 seasonal.fig <- grep('seasonal_loads', test)
-predictor.fig <- grep('runoff', test)
+predictor.fig <- grep('runoff_vs', test)
 
 if (length(time.figs) != length(plot_all_vars)|
     length(seasonal.fig) != 1 |
